@@ -199,7 +199,7 @@ void TM_Init(void)
 
   LST_init_head (&HostTxQueue);
 
-  MX_USART1_UART_Init();
+  MX_LPUART1_UART_Init();
 
   pHostRx = RxHostData;
   HciReceiveStatus = WAITING_TYPE;

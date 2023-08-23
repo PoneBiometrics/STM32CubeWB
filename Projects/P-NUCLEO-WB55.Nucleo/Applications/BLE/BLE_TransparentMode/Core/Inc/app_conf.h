@@ -359,7 +359,7 @@
 /**
  * Select UART interfaces
  */
-#define CFG_UART_GUI            hw_uart1
+#define CFG_UART_GUI            hw_lpuart1
 #define CFG_DEBUG_TRACE_UART    0
 /******************************************************************************
  * USB interface
@@ -389,7 +389,7 @@
  *  When set to 1, the low power mode is enable
  *  When set to 0, the device stays in RUN mode
  */
-#define CFG_LPM_SUPPORTED    1
+#define CFG_LPM_SUPPORTED    0
 
 /******************************************************************************
  * RTC interface
@@ -498,7 +498,7 @@ typedef enum
  * keep debugger enabled while in any low power mode when set to 1
  * should be set to 0 in production
  */
-#define CFG_DEBUGGER_SUPPORTED    0
+#define CFG_DEBUGGER_SUPPORTED    1
 
 /**
  * When set to 1, the traces are enabled in the BLE services
