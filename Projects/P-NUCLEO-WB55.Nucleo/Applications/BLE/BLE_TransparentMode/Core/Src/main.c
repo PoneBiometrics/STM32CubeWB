@@ -141,6 +141,23 @@ int main(void)
   /* Init code for STM32_WPAN */
   MX_APPE_Init();
 
+  uint8_t reg[1] = {0x21};
+  uint8_t buffer[10];
+  memset(buffer, 0, sizeof(buffer));
+
+  HAL_StatusTypeDef st = HAL_I2C_IsDeviceReady(&hi2c1, 0x48 << 1, 100, 10000);
+  HAL_StatusTypeDef status1 = HAL_I2C_Master_Transmit(&hi2c1, 0x48 << 1, reg, 1, 10000);
+  HAL_StatusTypeDef status2 = HAL_I2C_Master_Receive(&hi2c1, 0x48 << 1, buffer, 1, 10000);
+
+  if (st != HAL_OK || status1 != HAL_OK || status2 != HAL_OK) {
+	 MX_APPE_Process();
+  }
+
+  /*HAL_StatusTypeDef status = HAL_I2C_Mem_Read(&hi2c1, 0x48, (uint16_t)reg, I2C_MEMADD_SIZE_8BIT, (uint8_t*)&buffer, 1, 100);
+  if (status != HAL_OK) {
+	 MX_APPE_Process();
+  }*/
+
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	while(1)
@@ -244,7 +261,8 @@ static void MX_I2C1_Init(void)
 
   /* USER CODE END I2C1_Init 1 */
   hi2c1.Instance = I2C1;
-  hi2c1.Init.Timing = 0x00707CBB;
+  //hi2c1.Init.Timing = 0x00707CBB;
+  hi2c1.Init.Timing = 0x00000E14;
   hi2c1.Init.OwnAddress1 = 0;
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
   hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
