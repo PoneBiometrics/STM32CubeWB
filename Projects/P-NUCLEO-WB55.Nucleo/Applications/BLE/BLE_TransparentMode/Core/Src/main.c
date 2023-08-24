@@ -93,6 +93,82 @@ static void MX_RF_Init(void);
 /* USER CODE BEGIN 0 */
 
 /* USER CODE END 0 */
+#define MAX_ADDRESS (0x48 << 1)
+
+typedef struct {
+	uint16_t address;
+	uint8_t reg;
+	uint8_t mask;
+	uint8_t value;
+} i2c_map_t;
+
+i2c_map_t i2cMap[] = {
+		{ 0x0048, 0x20, 0xff, 0x05 },
+		{ 0x0048, 0x21, 0xe0, 0x00 },
+		{ 0x0048, 0x21, 0x1c, 0x00 },
+		{ 0x0048, 0x21, 0x02, 0x00 },
+		{ 0x0048, 0x22, 0xe0, 0xe0 },
+		{ 0x0048, 0x22, 0x18, 0x18 },
+		{ 0x0048, 0x22, 0x07, 0x02 },
+		{ 0x0048, 0x23, 0xe0, 0x00 },
+		{ 0x0048, 0x23, 0x1f, 0x10 },
+		{ 0x0048, 0x24, 0xfc, 0x00 },
+		{ 0x0048, 0x24, 0x03, 0x00 },
+		{ 0x0048, 0x24, 0x03, 0x00 },
+		{ 0x0048, 0x25, 0xfc, 0x00 },
+		{ 0x0048, 0x25, 0x02, 0x02 },
+		{ 0x0048, 0x26, 0xfc, 0x60 },
+		{ 0x0048, 0x26, 0x02, 0x00 },
+		{ 0x0048, 0x27, 0xfc, 0x60 },
+		{ 0x0048, 0x28, 0xf0, 0x30 },
+		{ 0x0048, 0x21, 0x01, 0x01 },
+		{ 0x0048, 0x08, 0x40, 0x40 },
+		{ 0x0048, 0x30, 0x7f, 0x64 },
+		{ 0x0048, 0x31, 0x03, 0x02 },
+		{ 0x0048, 0x24, 0xfc, 0x00 },
+		{ 0x0048, 0x06, 0x7c, 0x7c },
+		{ 0x0048, 0x07, 0x7c, 0x7c },
+};
+
+uint8_t readMaxRegister(uint8_t reg, uint8_t *value)
+{
+	uint8_t buffer[2] = {0, 0};
+	uint8_t regBuffer[1] = { reg };
+	HAL_StatusTypeDef status1 = HAL_I2C_Master_Transmit(&hi2c1, MAX_ADDRESS, regBuffer, 1, 10000);
+	HAL_StatusTypeDef status2 = HAL_I2C_Master_Receive(&hi2c1, MAX_ADDRESS, buffer, 1, 10000);
+
+	if (value != NULL) {
+		*value = buffer[0];
+	}
+
+	if (status1 == HAL_OK && status2 == HAL_OK) {
+		return 0;
+	}
+	return -1;
+}
+
+uint8_t writeMaxRegister(uint8_t reg, uint8_t value)
+{
+	uint8_t buffer[2] = {reg, value};
+    HAL_StatusTypeDef status = HAL_I2C_Master_Transmit(&hi2c1, MAX_ADDRESS, buffer, 2, 10000);
+    return status == HAL_OK ? 0 : -1;
+}
+
+uint8_t updateMaxRegister(uint8_t reg, uint8_t mask, uint8_t value)
+{
+	uint8_t newValue = 0;
+	uint8_t oldValue = 0;
+	if (readMaxRegister(reg, &oldValue) != 0) {
+		return -1;
+	}
+
+	newValue = (oldValue & ~mask) | (value & mask);
+	if (newValue == oldValue) {
+		return 0;
+	}
+
+	return writeMaxRegister(reg, newValue);
+}
 
 /**
   * @brief  The application entry point.
@@ -141,17 +217,31 @@ int main(void)
   /* Init code for STM32_WPAN */
   MX_APPE_Init();
 
-  uint8_t reg[1] = {0x21};
-  uint8_t buffer[10];
-  memset(buffer, 0, sizeof(buffer));
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_SET);
 
   HAL_StatusTypeDef st = HAL_I2C_IsDeviceReady(&hi2c1, 0x48 << 1, 100, 10000);
-  HAL_StatusTypeDef status1 = HAL_I2C_Master_Transmit(&hi2c1, 0x48 << 1, reg, 1, 10000);
-  HAL_StatusTypeDef status2 = HAL_I2C_Master_Receive(&hi2c1, 0x48 << 1, buffer, 1, 10000);
+  if (st == HAL_OK) {
+	  // Read interrupt registers to clear them
+	  readMaxRegister(0x00, NULL);
+	  readMaxRegister(0x01, NULL);
 
-  if (st != HAL_OK || status1 != HAL_OK || status2 != HAL_OK) {
-	 MX_APPE_Process();
+	  for (int i = 0; i < sizeof(i2cMap) / sizeof(i2c_map_t); i++) {
+		  updateMaxRegister(i2cMap[i].reg, i2cMap[i].mask, i2cMap[i].value);
+	  }
   }
+  //HAL_StatusTypeDef status1 = HAL_I2C_Master_Transmit(&hi2c1, 0x48 << 1, reg, 1, 10000);
+  //HAL_StatusTypeDef status2 = HAL_I2C_Master_Receive(&hi2c1, 0x48 << 1, buffer, 1, 10000);
+
+  /*if (st != HAL_OK || status1 != HAL_OK || status2 != HAL_OK) {
+	 MX_APPE_Process();
+  }*/
+
+  /*while(1) {
+	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_RESET);
+	  HAL_Delay(1000);
+	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_SET);
+	  HAL_Delay(1000);
+  }*/
 
   /*HAL_StatusTypeDef status = HAL_I2C_Mem_Read(&hi2c1, 0x48, (uint16_t)reg, I2C_MEMADD_SIZE_8BIT, (uint8_t*)&buffer, 1, 100);
   if (status != HAL_OK) {
@@ -508,13 +598,24 @@ static void MX_DMA_Init(void)
   */
 static void MX_GPIO_Init(void)
 {
-/* USER CODE BEGIN MX_GPIO_Init_1 */
-/* USER CODE END MX_GPIO_Init_1 */
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  /* USER CODE BEGIN MX_GPIO_Init_1 */
+  /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : PA12 */
+  GPIO_InitStruct.Pin = GPIO_PIN_12;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
