@@ -217,9 +217,10 @@ int main(void)
   /* Init code for STM32_WPAN */
   MX_APPE_Init();
 
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_SET);
+  //HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_SET);
+  //HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_SET);
 
-  HAL_StatusTypeDef st = HAL_I2C_IsDeviceReady(&hi2c1, 0x48 << 1, 100, 10000);
+  HAL_StatusTypeDef st = HAL_I2C_IsDeviceReady(&hi2c1, MAX_ADDRESS, 100, 10000);
   if (st == HAL_OK) {
 	  // Read interrupt registers to clear them
 	  readMaxRegister(0x00, NULL);
@@ -229,6 +230,7 @@ int main(void)
 		  updateMaxRegister(i2cMap[i].reg, i2cMap[i].mask, i2cMap[i].value);
 	  }
   }
+
   //HAL_StatusTypeDef status1 = HAL_I2C_Master_Transmit(&hi2c1, 0x48 << 1, reg, 1, 10000);
   //HAL_StatusTypeDef status2 = HAL_I2C_Master_Receive(&hi2c1, 0x48 << 1, buffer, 1, 10000);
 
@@ -242,6 +244,8 @@ int main(void)
 	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_SET);
 	  HAL_Delay(1000);
   }*/
+  //uint8_t buffer[] = "Testar";
+  //HAL_UART_Transmit(&hlpuart1, (uint8_t*)&buffer, 6, 100);
 
   /*HAL_StatusTypeDef status = HAL_I2C_Mem_Read(&hi2c1, 0x48, (uint16_t)reg, I2C_MEMADD_SIZE_8BIT, (uint8_t*)&buffer, 1, 100);
   if (status != HAL_OK) {
@@ -250,8 +254,8 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	while(1)
-	{
+  while(1)
+  {
     /* USER CODE END WHILE */
     MX_APPE_Process();
 
@@ -606,16 +610,30 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
+  __HAL_RCC_GPIOE_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : PA12 */
+  GPIO_InitStruct.Pin = GPIO_PIN_4;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
   GPIO_InitStruct.Pin = GPIO_PIN_12;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  GPIO_InitStruct.Pin = GPIO_PIN_4;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
