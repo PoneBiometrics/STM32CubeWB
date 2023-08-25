@@ -189,9 +189,9 @@ typedef enum
  * @brief Key push-buttons
  */
 #define BUTTON_SW1_PIN                          GPIO_PIN_4
-#define BUTTON_SW1_GPIO_PORT                    GPIOC
-#define BUTTON_SW1_GPIO_CLK_ENABLE()            __HAL_RCC_GPIOC_CLK_ENABLE()
-#define BUTTON_SW1_GPIO_CLK_DISABLE()           __HAL_RCC_GPIOC_CLK_DISABLE()
+#define BUTTON_SW1_GPIO_PORT                    GPIOA
+#define BUTTON_SW1_GPIO_CLK_ENABLE()            __HAL_RCC_GPIOA_CLK_ENABLE()
+#define BUTTON_SW1_GPIO_CLK_DISABLE()           __HAL_RCC_GPIOA_CLK_DISABLE()
 #define BUTTON_SW1_EXTI_LINE                    GPIO_PIN_4
 #ifdef CORE_CM0PLUS
 #define BUTTON_SW1_EXTI_IRQn                    EXTI15_4_IRQn
@@ -199,11 +199,11 @@ typedef enum
 #define BUTTON_SW1_EXTI_IRQn                    EXTI4_IRQn
 #endif /* CORE_CM0PLUS */
 
-#define BUTTON_SW2_PIN                          GPIO_PIN_0
-#define BUTTON_SW2_GPIO_PORT                    GPIOD
-#define BUTTON_SW2_GPIO_CLK_ENABLE()            __HAL_RCC_GPIOD_CLK_ENABLE()
-#define BUTTON_SW2_GPIO_CLK_DISABLE()           __HAL_RCC_GPIOD_CLK_DISABLE()
-#define BUTTON_SW2_EXTI_LINE                    GPIO_PIN_0
+#define BUTTON_SW2_PIN                          GPIO_PIN_11
+#define BUTTON_SW2_GPIO_PORT                    GPIOA
+#define BUTTON_SW2_GPIO_CLK_ENABLE()            __HAL_RCC_GPIOA_CLK_ENABLE()
+#define BUTTON_SW2_GPIO_CLK_DISABLE()           __HAL_RCC_GPIOA_CLK_DISABLE()
+#define BUTTON_SW2_EXTI_LINE                    GPIO_PIN_11
 #ifdef CORE_CM0PLUS
 #define BUTTON_SW2_EXTI_IRQn                    EXTI1_0_IRQn
 #else

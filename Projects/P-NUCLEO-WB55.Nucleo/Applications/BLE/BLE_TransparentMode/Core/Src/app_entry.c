@@ -134,7 +134,7 @@ void MX_APPE_Init(void)
   HW_TS_Init(hw_ts_InitMode_Full, &hrtc); /**< Initialize the TimerServer */
 
 /* USER CODE BEGIN APPE_Init_1 */
-  APPD_Init();
+  //APPD_Init();
 
   /**
    * The Standby mode should not be entered before the initialization is over
@@ -146,7 +146,7 @@ void MX_APPE_Init(void)
 
   Button_Init();
 
-  RxUART_Init();
+  //RxUART_Init();
 
 /* USER CODE END APPE_Init_1 */
   appe_Tl_Init();	/* Initialize all transport layers */
@@ -184,7 +184,6 @@ void Init_Exti(void)
 {
   /* Enable IPCC(36), HSEM(38) wakeup interrupts on CPU1 */
   LL_EXTI_EnableIT_32_63(LL_EXTI_LINE_36 | LL_EXTI_LINE_38);
-
   return;
 }
 
@@ -418,8 +417,8 @@ static void Button_Init( void )
    */
 
   BSP_PB_Init(BUTTON_SW1, BUTTON_MODE_EXTI);
-  BSP_PB_Init(BUTTON_SW2, BUTTON_MODE_EXTI);
-  BSP_PB_Init(BUTTON_SW3, BUTTON_MODE_EXTI);
+  //BSP_PB_Init(BUTTON_SW2, BUTTON_MODE_EXTI);
+  //BSP_PB_Init(BUTTON_SW3, BUTTON_MODE_EXTI);
 #endif
 
   return;

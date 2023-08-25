@@ -180,13 +180,14 @@ void TM_Init(void)
     /* if you are here, maybe CPU2 doesn't contain STM32WB_Copro_Wireless_Binaries, see Release_Notes.html */
     Error_Handler();
   }
-
+//#if 0
   status = SHCI_C2_BLE_Init(&ble_init_cmd_packet);
   if (status != SHCI_Success)
   {
     /* if you are here, maybe CPU2 doesn't contain STM32WB_Copro_Wireless_Binaries, see Release_Notes.html */
     Error_Handler();
   }
+//#endif
 
   UTIL_SEQ_RegTask(1<< CFG_TASK_SYS_LOCAL_CMD_ID, UTIL_SEQ_RFU, TM_SysLocalCmd);
   UTIL_SEQ_RegTask(1<< CFG_TASK_BLE_HCI_CMD_ID, UTIL_SEQ_RFU, (void (*)(void)) TL_BLE_SendCmd);

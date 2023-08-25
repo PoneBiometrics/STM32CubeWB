@@ -178,6 +178,7 @@ void APPD_Init( void )
 {
 /* USER CODE BEGIN APPD_Init */
 #if (CFG_DEBUGGER_SUPPORTED == 1)
+
   /**
    * Keep debugger enabled while in any low power mode
    */

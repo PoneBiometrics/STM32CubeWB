@@ -170,6 +170,19 @@ uint8_t updateMaxRegister(uint8_t reg, uint8_t mask, uint8_t value)
 	return writeMaxRegister(reg, newValue);
 }
 
+uint8_t shutdownDevice()
+{
+	uint8_t res = 0;
+	res = updateMaxRegister(0x31, 0x03, 0);
+	res = updateMaxRegister(0x31, 0x03, 2);
+	res = updateMaxRegister(0x08, 0x03, 2);
+	return res;
+}
+
+void applicationErrorHandler(void)
+{
+}
+
 /**
   * @brief  The application entry point.
   * @retval int
@@ -207,7 +220,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_DMA_Init();
-  MX_RTC_Init();
+  //MX_RTC_Init();
   MX_I2C1_Init();
   MX_RF_Init();
   /* USER CODE BEGIN 2 */
@@ -219,17 +232,21 @@ int main(void)
 
   //HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_SET);
   //HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_SET);
-
-  HAL_StatusTypeDef st = HAL_I2C_IsDeviceReady(&hi2c1, MAX_ADDRESS, 100, 10000);
+  //shutdownDevice();
+  HAL_StatusTypeDef st = HAL_I2C_IsDeviceReady(&hi2c1, MAX_ADDRESS, 100, 1000);
   if (st == HAL_OK) {
 	  // Read interrupt registers to clear them
-	  readMaxRegister(0x00, NULL);
-	  readMaxRegister(0x01, NULL);
+	  uint8_t res = 0;
+	  res = readMaxRegister(0x00, NULL);
+	  res = readMaxRegister(0x01, NULL);
 
 	  for (int i = 0; i < sizeof(i2cMap) / sizeof(i2c_map_t); i++) {
-		  updateMaxRegister(i2cMap[i].reg, i2cMap[i].mask, i2cMap[i].value);
+		  res = updateMaxRegister(i2cMap[i].reg, i2cMap[i].mask, i2cMap[i].value);
 	  }
+  } else {
+	  applicationErrorHandler();
   }
+
 
   //HAL_StatusTypeDef status1 = HAL_I2C_Master_Transmit(&hi2c1, 0x48 << 1, reg, 1, 10000);
   //HAL_StatusTypeDef status2 = HAL_I2C_Master_Receive(&hi2c1, 0x48 << 1, buffer, 1, 10000);
@@ -259,6 +276,19 @@ int main(void)
     /* USER CODE END WHILE */
     MX_APPE_Process();
 
+    uint8_t data = 0;
+    if (readMaxRegister(0, &data) == 0) {
+    	if ((data & 0x0C) != 0) {
+    		shutdownDevice();
+    	}
+    } else {
+    	applicationErrorHandler();
+    }
+
+    GPIO_PinState state = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_4);
+    if (state == GPIO_PIN_RESET) {
+    	shutdownDevice();
+    }
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -602,7 +632,7 @@ static void MX_DMA_Init(void)
   */
 static void MX_GPIO_Init(void)
 {
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  //GPIO_InitTypeDef GPIO_InitStruct = {0};
   /* USER CODE BEGIN MX_GPIO_Init_1 */
   /* USER CODE END MX_GPIO_Init_1 */
 
@@ -610,30 +640,30 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
-  __HAL_RCC_GPIOE_CLK_ENABLE();
+  //__HAL_RCC_GPIOE_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_RESET);
-  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_RESET);
+  //HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_RESET);
+  //HAL_GPIO_WritePin(GPIOE, GPIO_PIN_4, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : PA12 */
-  GPIO_InitStruct.Pin = GPIO_PIN_4;
+  /*Configure GPIO pin : PA4 */
+  /*GPIO_InitStruct.Pin = GPIO_PIN_4;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);*/
+/*
   GPIO_InitStruct.Pin = GPIO_PIN_12;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);*/
+/*
   GPIO_InitStruct.Pin = GPIO_PIN_4;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);*/
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
